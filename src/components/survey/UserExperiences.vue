@@ -8,8 +8,11 @@
         >
       </div>
       <p v-if="isLoading">Loading...</p>
-      <p v-else-if="!isLoading && (!results || results.length === 0)">No stored Experiences..</p>
-      <ul v-else-if="!isLoading && results &&results.length > 0">
+      <p v-else-if="!isLoading && error">{{ error }}</p>
+      <p v-else-if="!isLoading && (!results || results.length === 0)">
+        No stored Experiences..
+      </p>
+      <ul v-else-if="!isLoading && results && results.length > 0">
         <survey-result
           v-for="result in results"
           :key="result.id"
@@ -32,11 +35,13 @@ export default {
     return {
       results: [],
       isLoading: false,
+      error: null,
     };
   },
   methods: {
     loadExperience() {
       this.isLoading = true;
+      this.error = null;
       fetch(
         'https://vue-http-demo-869d8-default-rtdb.asia-southeast1.firebasedatabase.app/surveys.json'
       )
@@ -56,12 +61,16 @@ export default {
             });
           }
           this.results = results;
+        })
+        .catch(() => {
+          this.isLoading = false;
+          this.error = 'Failed to fetch data - please try again later.';
         });
     },
   },
   mounted() {
     this.loadExperience();
-  }
+  },
 };
 </script>
 
